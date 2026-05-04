@@ -1,164 +1,250 @@
-# Distributed Systems Project
+# 📡 Distributed Systems Project
 
-## Overview
+## 📖 Overview
 
-This project demonstrates two distributed systems built with Python, showcasing client-server architectures, thread synchronization, and real-time updates:
+This project demonstrates two distributed systems built with Python, showcasing **client-server architecture**, **thread synchronization**, and **real-time communication**:
 
-1. **Distributed Counter System**: A shared counter that multiple clients can increment, decrement, reset, or query over TCP.
-2. **Distributed Attendance System**: A system for tracking student attendance with unique name registration and real-time count broadcasting.
+1. **Distributed Counter System**  
+   A shared counter that multiple clients can increment, decrement, reset, or query over TCP.
 
-Both systems use threading and locks to handle concurrent access safely, preventing race conditions.
+2. **Distributed Attendance System**  
+   A full-stack attendance tracking system with:
+   - Student check-in (Streamlit UI)
+   - Admin dashboard
+   - Persistent database (SQLite)
+   - Real-time server communication
 
-## Features
+Both systems use **multithreading and locks** to safely handle concurrent users.
 
-- **Thread-Safe Operations**: Uses `threading.Lock` to synchronize access to shared state.
-- **Real-Time Broadcasting**: Servers broadcast updates to all connected clients for live synchronization.
-- **Multiple Client Types**: Console clients, GUI clients (Tkinter), and a web interface (Streamlit).
-- **TCP-Based Communication**: Reliable socket connections for client-server interaction.
-- **Concurrency Testing**: Designed to handle multiple simultaneous connections.
+---
 
-## Requirements
+## 🚀 Features
 
-- Python 3.7 or higher
-- `streamlit` library (install with `pip install streamlit`)
+### 🔒 Core Concepts
+- Thread-safe operations using `threading.Lock`
+- TCP socket communication
+- Multi-client support (concurrent connections)
+- Client-server architecture
 
-## Installation
+---
 
-1. Clone the repository:
-   ```bash
-   git clone <repository-url>
-   cd distributed-systems-project
-   ```
+### 🔢 Distributed Counter System
+- Increment / Decrement / Reset / Get counter
+- Multiple clients supported
+- Console client for testing
+- Demonstrates race condition handling
 
-2. Install dependencies:
-   ```bash
-   pip install streamlit
-   ```
+---
 
-## Usage
+### 📋 Distributed Attendance System
+- 🎓 Student attendance submission (ID + Name)
+- 🛡️ Admin dashboard (secure login)
+- 📊 Group-based tracking (Lectures & Tutorials)
+- 📁 CSV export (per group or all groups)
+- 🔍 Search functionality (admin)
+- 📈 Live capacity tracking
+- 💾 Persistent storage using SQLite
+- 🚫 Duplicate prevention (same student per day)
+- ⚡ Real-time server validation
 
-### Distributed Counter System
+---
 
-#### Components
-- `server.py`: TCP server managing the shared counter.
-- `client.py`: Console-based client for manual testing.
-- `client_gui.py`: Tkinter GUI client with buttons and live display.
-
-#### Running the Counter System
-
-1. **Start the server**:
-   ```bash
-   python server.py
-   ```
-   Output:
-   ```
-   [SERVER] Listening on 0.0.0.0:5000
-   [SERVER] Press Ctrl+C to stop
-   ```
-
-2. **Run clients** (in separate terminals):
-   - Console client:
-     ```bash
-     python client.py
-     ```
-     Type commands: `INCREMENT`, `DECREMENT`, `RESET`, `GET`, or `quit`.
-     Or run directly: `python client.py INCREMENT`
-
-   - GUI client:
-     ```bash
-     python client_gui.py
-     ```
-     A window appears with buttons and a live counter label.
-
-3. **Test concurrency**: Open multiple clients and perform operations simultaneously. The lock ensures correctness.
-
-#### How Synchronization Works
-
-Python threads share memory. Without locks, concurrent `INCREMENT` operations can cause race conditions:
+## 🏗️ Architecture
 
 ```
-Thread A reads counter = 5
-Thread B reads counter = 5
-Thread A writes counter = 6
-Thread B writes counter = 6  # Lost increment!
+[ Client (Streamlit / Console) ]
+                │
+                ▼
+        TCP Socket Server
+                │
+                ▼
+         SQLite Database
 ```
 
-`threading.Lock` solves this by making operations atomic:
+- Each client connects via TCP  
+- Server spawns a **thread per client**  
+- Database ensures **data persistence**  
+- Lock ensures **safe concurrent writes**
 
+---
+
+## ⚙️ Requirements
+
+- Python 3.7+
+- Streamlit
+
+Install dependencies:
+```bash
+pip install streamlit
+```
+
+---
+
+## 🛠️ Installation
+
+```bash
+git clone <your-repo-url>
+cd distributed-systems-project
+```
+
+---
+
+## ▶️ Usage
+
+### 🔢 Run Distributed Counter System
+
+#### Start Server
+```bash
+python server.py
+```
+
+#### Run Client
+```bash
+python client.py
+```
+
+Commands:
+```
+INCREMENT
+DECREMENT
+RESET
+GET
+```
+
+---
+
+### 📋 Run Attendance System
+
+#### 1. Start Server
+```bash
+python server.py
+```
+
+#### 2. Start Web App
+```bash
+streamlit run app.py
+```
+
+Open in browser:
+```
+http://localhost:8501
+```
+
+---
+
+## 🔐 Admin Login
+
+Default credentials:
+
+```
+Username: admin
+Password: 1234
+```
+
+You can change them using environment variables:
+
+```bash
+export ATTEND_ADMIN_USER=your_user
+export ATTEND_ADMIN_PASS=your_pass
+```
+
+---
+
+## 🌍 Environment Variables
+
+| Variable | Default | Description |
+|----------|--------|------------|
+| ATTEND_HOST | 127.0.0.1 | Server host |
+| ATTEND_PORT | 5000 | Server port |
+| ATTEND_CAPACITY | 40 | Max students per group |
+| ATTEND_ADMIN_USER | admin | Admin username |
+| ATTEND_ADMIN_PASS | 1234 | Admin password |
+
+---
+
+## 📡 Server Commands (Attendance)
+
+| Command | Description |
+|--------|------------|
+| `MARK:group:id:name` | Mark attendance |
+| `GET:group` | Get today’s count |
+| `ADMIN:group:date` | Get attendance list |
+| `SUMMARY:date` | Get all groups summary |
+
+---
+
+## 🗄️ Database
+
+- File: `attendance.db`
+- Uses SQLite for persistence
+
+Table structure:
+```sql
+attendance(
+    id INTEGER PRIMARY KEY,
+    grp TEXT,
+    sid TEXT,
+    name TEXT,
+    date TEXT
+)
+```
+
+Unique constraint prevents duplicates:
+```
+(group, sid, date)
+```
+
+---
+
+## ⚠️ Concurrency Handling
+
+Without locks:
+```
+Thread A reads value = 5
+Thread B reads value = 5
+Thread A writes 6
+Thread B writes 6  ❌ (lost update)
+```
+
+With locks:
 ```python
-counter_lock = threading.Lock()
-with counter_lock:
-    counter += 1
+with lock:
+    # safe operation
 ```
 
-### Distributed Attendance System
+✔ Ensures correct results under heavy load
 
-#### Components
-- `attendance_server.py`: TCP server managing the attendance set.
-- `attendance_client_gui.py`: Tkinter GUI for marking attendance.
-- `app.py`: Streamlit web interface for attendance management.
+---
 
-#### Running the Attendance System
-
-1. **Start the attendance server**:
-   ```bash
-   python attendance_server.py
-   ```
-
-2. **Run clients** (in separate terminals):
-   - GUI client:
-     ```bash
-     python attendance_client_gui.py
-     ```
-     Enter name and click "Mark Attendance".
-
-   - Web interface:
-     ```bash
-     streamlit run app.py
-     ```
-     Access at http://localhost:8501 for admin features like viewing/exporting attendance.
-
-#### Features
-- Unique name registration (no duplicates).
-- Real-time count updates via broadcasting.
-- Web app for administrative tasks (login required).
-
-## Architecture
-
-Both systems follow a similar pattern:
-- **Server**: Listens on TCP port, spawns threads per client, uses locks for shared state.
-- **Clients**: Connect via sockets, send commands, receive responses and broadcasts.
-- **Broadcasting**: Servers notify all clients of state changes for synchronization.
-
-## Code Structure
+## 📁 Project Structure
 
 | File | Description |
 |------|-------------|
-| `server.py` | Counter server with lock and broadcasting |
+| `server.py` | Counter + Attendance TCP server |
 | `client.py` | Counter console client |
-| `client_gui.py` | Counter GUI client |
-| `attendance_server.py` | Attendance server |
-| `attendance_client_gui.py` | Attendance GUI client |
-| `app.py` | Streamlit web app for attendance |
+| `app.py` | Streamlit attendance system |
 
-## FAQ
+---
 
-**Q: What happens with concurrent operations?**  
-A: Locks serialize updates, ensuring no data loss.
+## 💡 Future Improvements
 
-**Q: Why threading?**  
-A: Prevents blocking on slow clients; each connection gets its own thread.
+- User authentication system (database-based)
+- Docker deployment
+- Mobile-friendly UI
+- QR code attendance
+- Analytics dashboard
 
-**Q: Can the counter/attendance persist?**  
-A: Currently in-memory only. Extend with file/database storage.
+---
 
-**Q: How to add more operations?**  
-A: Modify server handlers and client commands.
+## 🤝 Contributing
 
-## Contributing
+Contributions are welcome! Feel free to:
+- Add new features
+- Improve UI
+- Optimize performance
 
-Feel free to extend with persistence, authentication, or more features!
+---
 
-## License
+## 📄 License
 
 MIT License
