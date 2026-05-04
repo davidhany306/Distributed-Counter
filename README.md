@@ -1,79 +1,67 @@
-# 📡 Distributed Systems Project
+# 📋 Distributed Attendance System
 
 ## 📖 Overview
 
-This project demonstrates two distributed systems built with Python, showcasing **client-server architecture**, **thread synchronization**, and **real-time communication**:
+This project is a **distributed attendance tracking system** built using Python.
+It demonstrates key distributed systems concepts such as:
 
-1. **Distributed Counter System**  
-   A shared counter that multiple clients can increment, decrement, reset, or query over TCP.
+* Client-server architecture (TCP sockets)
+* Multithreading & synchronization
+* Real-time communication
+* Persistent storage with SQLite
+* Web-based user interface using Streamlit
 
-2. **Distributed Attendance System**  
-   A full-stack attendance tracking system with:
-   - Student check-in (Streamlit UI)
-   - Admin dashboard
-   - Persistent database (SQLite)
-   - Real-time server communication
-
-Both systems use **multithreading and locks** to safely handle concurrent users.
+The system allows students to mark attendance and admins to monitor, search, and export records.
 
 ---
 
 ## 🚀 Features
 
-### 🔒 Core Concepts
-- Thread-safe operations using `threading.Lock`
-- TCP socket communication
-- Multi-client support (concurrent connections)
-- Client-server architecture
+### 🎓 Student Features
 
----
+* Mark attendance using **Student ID + Name**
+* Select lecture/tutorial group
+* Prevent duplicate attendance (same day)
+* Real-time validation with server
+* Live capacity tracking
 
-### 🔢 Distributed Counter System
-- Increment / Decrement / Reset / Get counter
-- Multiple clients supported
-- Console client for testing
-- Demonstrates race condition handling
+### 🛡️ Admin Features
 
----
-
-### 📋 Distributed Attendance System
-- 🎓 Student attendance submission (ID + Name)
-- 🛡️ Admin dashboard (secure login)
-- 📊 Group-based tracking (Lectures & Tutorials)
-- 📁 CSV export (per group or all groups)
-- 🔍 Search functionality (admin)
-- 📈 Live capacity tracking
-- 💾 Persistent storage using SQLite
-- 🚫 Duplicate prevention (same student per day)
-- ⚡ Real-time server validation
+* Secure login system
+* View attendance per group
+* View all groups summary
+* Filter by date
+* Export attendance as CSV
+* Search by name or ID
 
 ---
 
 ## 🏗️ Architecture
 
 ```
-[ Client (Streamlit / Console) ]
+[ Streamlit App (app.py) ]
                 │
                 ▼
-        TCP Socket Server
+        TCP Socket Server (server.py)
                 │
                 ▼
-         SQLite Database
+        SQLite Database (attendance.db)
 ```
 
-- Each client connects via TCP  
-- Server spawns a **thread per client**  
-- Database ensures **data persistence**  
-- Lock ensures **safe concurrent writes**
+* The **client (Streamlit app)** communicates with the server via TCP sockets
+* The **server handles multiple clients** using threads
+* The **database ensures data persistence**
+* Locks ensure **safe concurrent operations**
 
 ---
 
 ## ⚙️ Requirements
 
-- Python 3.7+
-- Streamlit
+* Python 3.7+
+* Streamlit
 
 Install dependencies:
+
 ```bash
 pip install streamlit
 ```
@@ -84,50 +72,39 @@ pip install streamlit
 
 ```bash
 git clone <your-repo-url>
-cd distributed-systems-project
+cd <your-project-folder>
 ```
 
 ---
 
 ## ▶️ Usage
 
-### 🔢 Run Distributed Counter System
+### 1. Start the Server
 
-#### Start Server
 ```bash
 python server.py
-```
-
-#### Run Client
-```bash
-python client.py
-```
-
-Commands:
-```
-INCREMENT
-DECREMENT
-RESET
-GET
 ```
 
 ---
 
-### 📋 Run Attendance System
+### 2. Run the Web App
 
-#### 1. Start Server
-```bash
-python server.py
-```
-
-#### 2. Start Web App
 ```bash
 streamlit run app.py
 ```
 
-Open in browser:
+Open in your browser:
+
 ```
 http://localhost:8501
+```
+
+---
+
+### 3. (Optional) Run Console Client
+
+```bash
+python client.py
 ```
 
 ---
@@ -152,33 +129,34 @@ export ATTEND_ADMIN_PASS=your_pass
 
 ## 🌍 Environment Variables
 
-| Variable | Default | Description |
-|----------|--------|------------|
-| ATTEND_HOST | 127.0.0.1 | Server host |
-| ATTEND_PORT | 5000 | Server port |
-| ATTEND_CAPACITY | 40 | Max students per group |
-| ATTEND_ADMIN_USER | admin | Admin username |
-| ATTEND_ADMIN_PASS | 1234 | Admin password |
+| Variable          | Default   | Description            |
+| ----------------- | --------- | ---------------------- |
+| ATTEND_HOST       | 127.0.0.1 | Server host            |
+| ATTEND_PORT       | 5000      | Server port            |
+| ATTEND_CAPACITY   | 40        | Max students per group |
+| ATTEND_ADMIN_USER | admin     | Admin username         |
+| ATTEND_ADMIN_PASS | 1234      | Admin password         |
 
 ---
 
-## 📡 Server Commands (Attendance)
+## 📡 Server Commands
 
-| Command | Description |
-|--------|------------|
-| `MARK:group:id:name` | Mark attendance |
-| `GET:group` | Get today’s count |
-| `ADMIN:group:date` | Get attendance list |
-| `SUMMARY:date` | Get all groups summary |
+| Command            | Description                  |
+| ------------------ | ---------------------------- |
+| MARK:group:id:name | Mark attendance              |
+| GET:group          | Get today's attendance count |
+| ADMIN:group:date   | Get attendance list          |
+| SUMMARY:date       | Get all groups summary       |
 
 ---
 
 ## 🗄️ Database
 
-- File: `attendance.db`
-- Uses SQLite for persistence
+* File: `attendance.db`
+* Database: SQLite
 
-Table structure:
+### Table Structure:
+
 ```sql
 attendance(
     id INTEGER PRIMARY KEY,
@@ -189,7 +167,10 @@ attendance(
 )
 ```
 
-Unique constraint prevents duplicates:
+### Constraint:
+
+* Prevents duplicate attendance:
+
 ```
 (group, sid, date)
 ```
@@ -199,52 +180,51 @@ Unique constraint prevents duplicates:
 ## ⚠️ Concurrency Handling
 
 Without locks:
+
 ```
-Thread A reads value = 5
-Thread B reads value = 5
-Thread A writes 6
-Thread B writes 6  ❌ (lost update)
+Thread A reads value
+Thread B reads value
+Thread A writes
+Thread B overwrites ❌
 ```
 
 With locks:
+
 ```python
 with lock:
-    # safe operation
+    # safe database operation
 ```
 
-✔ Ensures correct results under heavy load
+✔ Ensures correct behavior with multiple users
 
 ---
 
 ## 📁 Project Structure
 
-| File | Description |
-|------|-------------|
-| `server.py` | Counter + Attendance TCP server |
-| `client.py` | Counter console client |
-| `app.py` | Streamlit attendance system |
+| File        | Description                         |
+| ----------- | ----------------------------------- |
+| `server.py` | TCP server handling attendance      |
+| `app.py`    | Streamlit web interface             |
+| `client.py` | Optional console client for testing |
 
 ---
 
 ## 💡 Future Improvements
 
-- User authentication system (database-based)
-- Docker deployment
-- Mobile-friendly UI
-- QR code attendance
-- Analytics dashboard
+* Authentication system with database
+* QR code attendance
+* Mobile-friendly UI
+* Docker deployment
+* Analytics dashboard
 
 ---
 
 ## 🤝 Contributing
 
 Contributions are welcome! Feel free to:
-- Add new features
-- Improve UI
-- Optimize performance
 
----
+* Improve UI
+* Add features
+* Optimize performance
 
-## 📄 License
 
-MIT License
